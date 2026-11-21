@@ -4,7 +4,7 @@ A stock and ordering planner for Lumino Industries, built for the "1,700 Poles" 
 
 **Live app: https://pratik2607.github.io/slow-the-trucks/** (opens without signing in)
 
-Lumino orders material months ahead and ships it to site stores on a fixed plan, whatever the site actually uses. Stock piles up. The brief tells of 1,700 poles lying idle because nobody slowed the trucks. Lumino's own records for this project show the pile reached 48,991.
+Lumino orders material months ahead and ships it to site stores on a fixed plan, whatever the site actually uses. Stock piles up, because nobody slows the trucks. In Lumino's records for this project, 48,991 PCC poles were lying idle in the worst month.
 
 This app replays that real project month by month and shows what a planner that orders from actual usage would have done instead.
 
