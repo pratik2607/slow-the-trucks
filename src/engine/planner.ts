@@ -42,9 +42,21 @@ export interface PlanSettings {
    * stand-in is what Lumino finally bought: with this on, the plan never orders more than that.
    */
   knowsTotal: boolean
+  /**
+   * How many months back the planner looks when it works out the monthly need. A short memory
+   * chases every surge and over-orders five months later; nine months was the steadiest of the
+   * windows tried (6, 9 and 12), and all three are offered on the page.
+   */
+  lookback: number
 }
 
-export const DEFAULT_SETTINGS: PlanSettings = { signal: 'usage', caution: 2.5, warmup: 3, knowsTotal: true }
+export const DEFAULT_SETTINGS: PlanSettings = {
+  signal: 'usage',
+  caution: 3,
+  warmup: 3,
+  knowsTotal: true,
+  lookback: 9,
+}
 
 export interface Move {
   from: number
@@ -215,8 +227,7 @@ export function planItem(project: Project, code: string, settings: PlanSettings 
 
     // ---- decide, from months before m only ------------------------------------------------------
     const since = (window: number) => Math.max(firstNeed, m - window)
-    const rate = (series: readonly number[]) =>
-      Math.max(0, mean(series.slice(since(3), m)), mean(series.slice(since(6), m)))
+    const rate = (series: readonly number[]) => Math.max(0, mean(series.slice(since(settings.lookback), m)))
     const f = need.map(rate)
     const bump = need.map((d) => spread(d.slice(since(12), m)))
     const F = f.reduce((a, b) => a + b, 0)
