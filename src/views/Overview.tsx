@@ -1,8 +1,7 @@
-// Overview: the whole project, all 16 items. A newcomer gets one line on what this is and one
-// thing to press; then the buffer, because every figure below depends on it; then the overall
-// result with what makes it trustworthy beside it; then each item, actual against our plan.
+// Overview: the whole project, all 16 items. The buffer comes first because every figure below
+// depends on it; then the overall result with what makes it trustworthy beside it; then each
+// item, actual against our plan.
 
-import { PlayIcon } from '../components/ui'
 import type { PlanSettings } from '../engine/planner'
 import { type Replay, type Selection } from '../model'
 import { BufferPicker } from './parts/BufferPicker'
@@ -21,33 +20,17 @@ export function Overview({
   run,
   setSettings,
   openItem,
-  playPoles,
 }: {
   sel: Selection
   run: Replay
   setSettings: (patch: Partial<PlanSettings>) => void
   openItem: (code: string) => void
-  playPoles: () => void
 }) {
   return (
     <div className="grid gap-7">
       <PageHeader title="Overview" job="Job 2: Plan it">
         Our plan against what actually happened. All 16 items, six godowns, the whole project from March 2023 to October 2026.
       </PageHeader>
-
-      <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4 rounded-2xl bg-ink px-6 py-5 text-panel shadow-card">
-        <div className="max-w-[60ch]">
-          <p className="wide text-[21px] font-extrabold leading-tight tracking-[-0.01em]">The brief says 1,700 poles lay idle. The records say 48,991.</p>
-          <p className="mt-1.5 text-[14.5px] leading-relaxed text-panel/80">
-            Lumino's trucks ran to a fixed timetable while the site worked at its own pace. This planner tells the stores each month what to order, hold and move, from
-            what the site actually used.
-          </p>
-        </div>
-        <button type="button" onClick={playPoles} className="inline-flex shrink-0 items-center gap-2.5 rounded-xl bg-panel px-5 py-3 text-[15px] font-semibold text-ink hover:bg-cement">
-          <PlayIcon playing={false} />
-          Play the pole replay
-        </button>
-      </div>
 
       <BufferPicker run={run} setSettings={setSettings} />
 

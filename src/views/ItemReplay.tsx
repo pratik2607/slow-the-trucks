@@ -1,7 +1,7 @@
 // Item replay: one item, followed from vendor to site month by month, actual against our plan.
 // This is the only plan screen that needs an item picker, so it is the only one that has it.
 
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Legend, TimeChart, type Series } from '../components/chart'
 import { Figure, ItemSelect, Panel, PlayIcon, usePlayback } from '../components/ui'
 import { monthLabel, percent, qty, shortName, unitWord } from '../lib/format'
@@ -9,29 +9,9 @@ import { months, POLE, type Replay, type Selection, type SetSelection } from '..
 import { Flow } from './parts/Flow'
 import { ACTUAL, Dot, PageHeader, PLAN } from './parts/shared'
 
-export function ItemReplay({
-  sel,
-  set,
-  run,
-  autoplay = false,
-  onAutoplayed,
-}: {
-  sel: Selection
-  set: SetSelection
-  run: Replay
-  /** Start the replay from the first month as soon as the screen opens. */
-  autoplay?: boolean
-  onAutoplayed?: () => void
-}) {
+export function ItemReplay({ sel, set, run }: { sel: Selection; set: SetSelection; run: Replay }) {
   const m = sel.month
   const play = usePlayback(m, (month) => set({ month }), true)
-  useEffect(() => {
-    if (!autoplay) return
-    play.start()
-    onAutoplayed?.()
-    // Runs once when the screen is opened with autoplay set.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoplay])
   const plan = run.plans[sel.item]
   const score = run.scores[sel.item]
   const unit = unitWord(plan.item.unit)
