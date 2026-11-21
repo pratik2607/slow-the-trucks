@@ -1,15 +1,22 @@
-import { useState } from 'react'
-import { POLE, summaries, type Selection } from './model'
+import { useMemo, useState } from 'react'
+import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
+import { POLE, replay, summaries, type Selection } from './model'
+import { PlanIt } from './views/PlanIt'
 import { SeeIt } from './views/SeeIt'
 
 // The numbers are the brief's own: Lumino asked for three jobs, in this order.
-const TABS = [{ id: 'see', label: '1  See it' }] as const
+const TABS = [
+  { id: 'see', label: '1  See it' },
+  { id: 'plan', label: '2  Plan it' },
+] as const
 type TabId = (typeof TABS)[number]['id']
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('see')
   const [sel, setSel] = useState<Selection>({ item: POLE, godown: -1, month: summaries[POLE].peakIdleMonth })
+  const [settings, setSettings] = useState<PlanSettings>(DEFAULT_SETTINGS)
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
+  const run = useMemo(() => replay(settings), [settings])
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
@@ -37,7 +44,12 @@ export default function App() {
         </nav>
       </header>
 
-      <main>{tab === 'see' && <SeeIt sel={sel} set={set} />}</main>
+      <main>
+        {tab === 'see' && <SeeIt sel={sel} set={set} />}
+        {tab === 'plan' && (
+          <PlanIt sel={sel} set={set} run={run} setSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+        )}
+      </main>
 
       <footer className="mt-10 max-w-[80ch] text-[12.5px] text-muted">
         Built at Vibe Coders Hackathon Edition 3 on data from Lumino Industries Limited. Quantities are exactly as
