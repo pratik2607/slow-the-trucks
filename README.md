@@ -31,11 +31,13 @@ Everything is counted in quantities. Lumino's records carry no prices, so the ap
 | 2. Plan it: replay the project, seeing only what was known at each date | Overview, Monthly sheet, Item replay |
 | 3. Match the sets: flag every month a set is out of balance, in any godown | Set check |
 
-## Ask AI (demo)
+## Ask AI
 
-A chat over the data. In this demo it answers a set of common questions from the records and the replay: idle stock, what to order, deliveries, usage, the worst month, lead times, what the plan saves and which sets are out of balance. A language model is planned behind the same screen.
+A chat over the data, answered by a language model (Gemini on Vertex AI). The page writes out the records and the replay as plain text and sends them with the question; the model answers from that text alone.
 
-It has a data cut-off month. It answers as if that month were today, declines anything later, and stops its totals and averages there. Moving the cut-off forward is the only way to let it see more.
+It has a data cut-off month. Only the records up to that month are sent, so the model cannot see past it; a test checks that the text holds no later month. The app's own calculation runs first: it declines a question about a later month before any model is asked, hands the model checked figures to build on, and is the answer shown if the model cannot be reached.
+
+A static site cannot keep a key, so the question goes through a small relay (`relay/server.js`) on Cloud Run. The relay holds no key either: it signs its calls with the cloud project's own identity. It answers only this site, fixes the model's instructions on the server, and limits how much and how often it can be asked.
 
 ## How the planner decides
 
@@ -66,11 +68,11 @@ Three items show no gain: they were bought almost entirely before the first unit
 
 ## How it is built
 
-- React, TypeScript and Vite. A static site: no backend, no keys, nothing to sign in to.
+- React, TypeScript and Vite. A static site with nothing to sign in to. The one server-side piece is the Ask AI relay in `relay/`; there are no keys anywhere, in the page, the relay or this repository.
 - Every push to `main` runs the tests, builds the site and publishes it to GitHub Pages.
 - `scripts/build-data.mjs` turns Lumino's raw CSVs into one monthly table (`src/data/project.json`). The raw files belong to Lumino and are not in this repository.
 - `src/engine/` holds the logic as plain functions: `ledger.ts` (job 1), `planner.ts` (job 2), `sets.ts` (job 3).
-- 49 tests cover the stock sums, the replay, the set check and the chat.
+- 51 tests cover the stock sums, the replay, the set check, the chat and what the language model is sent.
 
 ```bash
 npm install

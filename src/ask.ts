@@ -1,9 +1,10 @@
-// Ask the records: plain questions about the data, answered in the browser.
+// The app's own calculation behind Ask AI: plain questions about the data, answered in the browser.
 //
-// There is no language model here and no key. A question is matched to an item, a month, a godown
-// and one of a dozen kinds of question, and the answer is worked out from Lumino's records and the
-// replay on the spot. It can only ever say what the data says; when it does not understand, it
-// says so and lists what it can answer.
+// There is no language model in this file and no key. A question is matched to an item, a month, a
+// godown and one of a dozen kinds of question, and the answer is worked out from Lumino's records
+// and the replay on the spot. The Ask AI screen runs this first, then asks the language model
+// (src/llm.ts): this answer declines anything past the cut-off before a model is asked, gives the
+// model checked figures to build on, and is what is shown if the model cannot be reached.
 //
 // It also has a cut-off month. It answers as if that month were today: nothing after it exists,
 // totals and averages stop there, and a question about a later month is declined. Moving the

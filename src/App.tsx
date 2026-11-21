@@ -22,7 +22,7 @@ const NAV = [
   },
   {
     group: 'Ask',
-    items: [{ id: 'ask', label: 'Ask AI', tag: 'Demo', icon: 'M4 4.5h12v8.5H9.5L6 16v-3H4z' }],
+    items: [{ id: 'ask', label: 'Ask AI', tag: 'Gemini', icon: 'M4 4.5h12v8.5H9.5L6 16v-3H4z' }],
   },
   {
     group: 'Records',
