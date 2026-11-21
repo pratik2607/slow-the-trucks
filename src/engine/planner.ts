@@ -52,7 +52,9 @@ export interface PlanSettings {
 
 export const DEFAULT_SETTINGS: PlanSettings = {
   signal: 'usage',
-  caution: 3,
+  // The largest buffer on offer. With it the site never waits for any of the 16 items in any
+  // month, which is the claim that matters most: stock cut by starving the site does not count.
+  caution: 4,
   warmup: 3,
   knowsTotal: true,
   lookback: 9,
@@ -379,6 +381,12 @@ export interface PlanScore {
   deliveredPlan: number
   endIdleReal: number
   endIdlePlan: number
+  /**
+   * Average idle stock counted in months of the site's own average need. It needs no prices and
+   * can be compared across items counted in different units.
+   */
+  monthsOnHandReal: number
+  monthsOnHandPlan: number
 }
 
 export function scorePlan(p: ItemPlan): PlanScore {
@@ -422,6 +430,10 @@ export function scorePlan(p: ItemPlan): PlanScore {
 
   const avgIdleReal = avg(p.realIdle)
   const avgIdlePlan = avg(p.idle)
+  // Average need over the months the item was actually in use.
+  const firstNeed = p.needTotal.findIndex((x) => x > 0)
+  const lastNeed = p.needTotal.findLastIndex((x) => x > 0)
+  const needPerMonth = firstNeed < 0 ? 0 : p.needTotal.reduce((a, b) => a + b, 0) / (lastNeed - firstNeed + 1)
   const peakMonthReal = argmax(p.realIdle)
   const peakMonthPlan = argmax(p.idle)
   return {
@@ -444,5 +456,7 @@ export function scorePlan(p: ItemPlan): PlanScore {
     deliveredPlan: tidy(p.delivered.reduce((a, b) => a + b, 0)),
     endIdleReal: p.realIdle[N - 1],
     endIdlePlan: p.idle[N - 1],
+    monthsOnHandReal: needPerMonth > 0 ? avgIdleReal / needPerMonth : 0,
+    monthsOnHandPlan: needPerMonth > 0 ? avgIdlePlan / needPerMonth : 0,
   }
 }

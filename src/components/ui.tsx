@@ -34,21 +34,12 @@ export function ItemSelect({ value, onChange }: { value: string; onChange: (code
   )
 }
 
-/** The month slider with a play button that walks through the project one month at a time. */
-export function Scrubber({
-  month,
-  set,
-  restart = false,
-}: {
-  month: number
-  set: (month: number) => void
-  /** If true, the first press of play starts from the first month, wherever the marker is. */
-  restart?: boolean
-}) {
+/** Walks the month marker through the project, one month at a time. */
+export function usePlayback(month: number, set: (month: number) => void, restart = false) {
   const [playing, setPlaying] = useState(false)
-  const fresh = useRef(restart)
   const latest = useRef(set)
   latest.current = set
+  const fresh = useRef(restart)
   const last = months.length - 1
 
   useEffect(() => {
@@ -62,30 +53,94 @@ export function Scrubber({
     return () => window.clearTimeout(id)
   }, [playing, month, last, restart])
 
+  return {
+    playing,
+    /** Play or pause. The first play starts from the first month if `restart` is set. */
+    toggle: () => {
+      if (!playing && (month >= last || fresh.current)) set(0)
+      fresh.current = false
+      setPlaying((p) => !p)
+    },
+    /** Start again from the first month. */
+    start: () => {
+      set(0)
+      fresh.current = false
+      setPlaying(true)
+    },
+    /** Move to a month by hand, which stops the replay. */
+    jump: (m: number) => {
+      setPlaying(false)
+      fresh.current = false
+      set(m)
+    },
+  }
+}
+
+export type Playback = ReturnType<typeof usePlayback>
+
+export function PlayIcon({ playing }: { playing: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden className="shrink-0">
+      {playing ? <path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor" /> : <path d="M3 1.5v11l9-5.5z" fill="currentColor" />}
+    </svg>
+  )
+}
+
+/** The month slider with a play button that walks through the project one month at a time. */
+export function Scrubber({
+  month,
+  set,
+  restart = false,
+}: {
+  month: number
+  set: (month: number) => void
+  /** If true, the first press of play starts from the first month, wherever the marker is. */
+  restart?: boolean
+}) {
+  const play = usePlayback(month, set, restart)
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <button
         type="button"
-        onClick={() => {
-          if (!playing && (month >= last || fresh.current)) set(0)
-          fresh.current = false
-          setPlaying((p) => !p)
-        }}
-        className="w-[7.5rem] shrink-0 rounded-md bg-ink px-3 py-1.5 text-[13px] font-semibold text-panel"
+        onClick={play.toggle}
+        className="flex w-[8.5rem] shrink-0 items-center justify-center gap-2 rounded-xl bg-ink px-3 py-2 text-[13px] font-semibold text-panel"
       >
-        {playing ? 'Pause' : 'Play the replay'}
+        <PlayIcon playing={play.playing} />
+        {play.playing ? 'Pause' : 'Play the replay'}
       </button>
       <div className="min-w-0 flex-1">
-        <MonthPicker
-          month={month}
-          set={(m) => {
-            setPlaying(false)
-            fresh.current = false
-            set(m)
-          }}
-        />
+        <MonthPicker month={month} set={play.jump} />
       </div>
     </div>
+  )
+}
+
+const TONES = {
+  saved: 'bg-saved-soft text-saved',
+  wait: 'bg-wait-soft text-critical',
+  quiet: 'bg-cement text-ink-2',
+  ink: 'bg-ink text-panel',
+} as const
+
+/** A short status word. Kept to two or three words so it can be read at a glance. */
+export function Badge({ tone = 'quiet', children }: { tone?: keyof typeof TONES; children: ReactNode }) {
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[12.5px] font-semibold whitespace-nowrap ${TONES[tone]}`}>{children}</span>
+}
+
+/** A filter that is always on screen, with the number it would show. */
+export function Chip({ active, onClick, children, count }: { active: boolean; onClick: () => void; children: ReactNode; count?: number }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[13.5px] whitespace-nowrap ${
+        active ? 'border-ink bg-ink font-semibold text-panel' : 'border-rule bg-panel text-ink-2 hover:border-axis'
+      }`}
+    >
+      {children}
+      {count !== undefined && <span className={`figures text-[12.5px] ${active ? 'text-panel/75' : 'text-muted'}`}>{count}</span>}
+    </button>
   )
 }
 
@@ -104,7 +159,7 @@ export function Panel({
   flush?: boolean
 }) {
   return (
-    <section className="rounded-md border border-rule bg-panel">
+    <section className="rounded-2xl border border-rule bg-panel shadow-card">
       {(title || aside) && (
         <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2 px-4 pt-3.5">
           <div className="max-w-[72ch]">
@@ -131,14 +186,14 @@ export function Segmented<T extends string | number>({
   onChange: (value: T) => void
 }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-0.5 rounded-md border border-rule bg-panel p-0.5">
+    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-0.5 rounded-xl border border-rule bg-panel p-1">
       {options.map((o) => (
         <button
           key={String(o.value)}
           type="button"
           aria-pressed={o.value === value}
           onClick={() => onChange(o.value)}
-          className={`rounded-[5px] px-2.5 py-1 text-[13px] ${
+          className={`rounded-lg px-3 py-1 text-[13px] ${
             o.value === value ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-cement'
           }`}
         >

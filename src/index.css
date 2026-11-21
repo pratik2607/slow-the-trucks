@@ -8,17 +8,26 @@
 @theme {
   --font-sans: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --color-cement: #eceeeb;
-  --color-panel: #fafbfa;
+  --color-cement: #f2f4f1;
+  --color-panel: #ffffff;
   --color-ink: #17202b;
   --color-ink-2: #4d5761;
   --color-muted: #808a93;
-  --color-rule: #dde1de;
+  --color-rule: #e6e9e6;
   --color-axis: #b9c0bd;
 
   --color-plan: #2a78d6;
+  --color-plan-soft: #e6effb;
   --color-real: #eb6834;
+  --color-real-soft: #fdede5;
   --color-held: #1baf7a;
+  --color-saved: #17803d;
+  --color-saved-soft: #e6f4ea;
+  --color-wait-soft: #fbeaea;
+
+  /* One soft shadow, tinted with the ink colour so it sits in the page instead of on it. */
+  --shadow-card: 0 1px 2px rgb(23 32 43 / 0.05), 0 16px 32px -20px rgb(23 32 43 / 0.22);
+  --shadow-bar: 0 8px 24px -16px rgb(23 32 43 / 0.28);
 
   --color-critical: #d03b3b;
   --color-warning: #fab219;

@@ -26,14 +26,6 @@ const COMPACT = new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFra
 /** Short form for axis ticks: 35K, 1.2L, 3Cr. */
 export const compact = (x: number): string => (Math.abs(x) < 1000 ? qty(x) : COMPACT.format(x))
 
-/** Rupees in lakh and crore, the way the numbers are spoken. */
-export function rupees(x: number): string {
-  const a = Math.abs(x)
-  if (a >= 1e7) return `₹${(a >= 1e8 ? F1 : F2).format(x / 1e7)} crore`
-  if (a >= 1e5) return `₹${F1.format(x / 1e5)} lakh`
-  return `₹${F0.format(x)}`
-}
-
 /** Months of cover, one decimal. */
 export const cover = (x: number | null): string => (x === null ? 'no usage' : x >= 100 ? '99+' : F1.format(x))
 

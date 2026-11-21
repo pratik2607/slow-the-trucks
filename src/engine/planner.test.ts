@@ -122,6 +122,20 @@ describe('the result on poles', () => {
     expect(s.peakIdlePlan).toBeLessThan(s.peakIdleReal)
   })
 
+  it('counts stock on hand in months of work, so items in different units can be compared', () => {
+    const s = scorePlan(planItem(project, POLE))
+    const months = project.flows[POLE].use
+    const first = months.findIndex((x) => x > 0)
+    const last = months.findLastIndex((x) => x > 0)
+    const perMonth = months.reduce((a, b) => a + b, 0) / (last - first + 1)
+    expect(s.monthsOnHandReal).toBeCloseTo(s.avgIdleReal / perMonth, 6)
+    expect(s.monthsOnHandPlan).toBeLessThan(s.monthsOnHandReal)
+  })
+
+  it('never keeps the site waiting for any item on the default buffer', () => {
+    for (const item of project.items) expect(scorePlan(planItem(project, item.code)).shortMonths, item.code).toBe(0)
+  })
+
   it('trades idle stock for safety as the buffer grows', () => {
     const lean = scorePlan(planItem(project, POLE, { ...DEFAULT_SETTINGS, caution: 0.5 }))
     const careful = scorePlan(planItem(project, POLE, { ...DEFAULT_SETTINGS, caution: 3.5 }))
