@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { Legend, TimeChart, type Series } from '../components/chart'
 import { Figure, ItemSelect, Panel, PlayIcon, usePlayback } from '../components/ui'
 import { monthLabel, percent, qty, shortName, unitWord } from '../lib/format'
-import { months, POLE, type Replay, type Selection, type SetSelection } from '../model'
+import { months, type Replay, type Selection, type SetSelection } from '../model'
 import { Flow } from './parts/Flow'
 import { ACTUAL, Dot, PageHeader, PLAN } from './parts/shared'
 
@@ -34,9 +34,7 @@ export function ItemReplay({ sel, set, run }: { sel: Selection; set: SetSelectio
   return (
     <div className="grid gap-6">
       <PageHeader title="Item replay" job="Job 2: Plan it">
-        {sel.item === POLE
-          ? "Lumino's brief tells of 1,700 poles lying idle because nobody slowed the trucks. Its own records show the pile reached 48,991. Follow them from vendor to site, month by month."
-          : `Follow ${name} from vendor to site, month by month, actual against our plan.`}
+        Follow {name} from vendor to site, month by month, actual against our plan.
       </PageHeader>
 
       <div className="sticky top-0 z-20 -mx-4 border-y border-rule bg-cement/90 px-4 py-2.5 shadow-bar backdrop-blur sm:-mx-8 sm:px-8">
