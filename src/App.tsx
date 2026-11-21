@@ -58,6 +58,8 @@ export default function App() {
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
   const setSettings = (patch: Partial<PlanSettings>) => setSettingsState((s) => ({ ...s, ...patch }))
   const run = useMemo(() => replay(settings), [settings])
+  // Set when a screen asks for the replay to start by itself; the replay clears it once it has.
+  const [autoplay, setAutoplay] = useState(false)
 
   return (
     <div className="lg:grid lg:min-h-dvh lg:grid-cols-[15rem_minmax(0,1fr)]">
@@ -117,10 +119,15 @@ export default function App() {
                 set({ item })
                 go('item')
               }}
+              playPoles={() => {
+                set({ item: POLE })
+                setAutoplay(true)
+                go('item')
+              }}
             />
           )}
           {screen === 'sheet' && <Sheet sel={sel} set={set} run={run} openSets={() => go('sets')} />}
-          {screen === 'item' && <ItemReplay sel={sel} set={set} run={run} />}
+          {screen === 'item' && <ItemReplay sel={sel} set={set} run={run} autoplay={autoplay} onAutoplayed={() => setAutoplay(false)} />}
           {screen === 'register' && <SeeIt sel={sel} set={set} />}
           {screen === 'sets' && <Sets sel={sel} set={set} />}
           {screen === 'settings' && <PlanSettingsView run={run} setSettings={setSettings} />}
