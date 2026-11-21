@@ -2,6 +2,8 @@
 
 A stock and ordering planner for Lumino Industries, built for the "1,700 Poles" problem statement at Vibe Coders Hackathon Edition 3 (Calcutta AI Club, 21 November 2026).
 
+**Live app: https://pratik2607.github.io/slow-the-trucks/** (opens without signing in)
+
 Lumino orders material months ahead and ships it to site stores on a fixed plan, whatever the site actually uses. Stock piles up. The brief tells of 1,700 poles lying idle because nobody slowed the trucks. Lumino's own records for this project show the pile reached 48,991.
 
 This app replays that real project month by month and shows what a planner that orders from actual usage would have done instead.
@@ -59,6 +61,7 @@ Three items show no gain: they were bought almost entirely before the first unit
 ## How it is built
 
 - React, TypeScript and Vite. A static site: no backend, no keys, nothing to sign in to.
+- Every push to `main` runs the tests, builds the site and publishes it to GitHub Pages.
 - `scripts/build-data.mjs` turns Lumino's raw CSVs into one monthly table (`src/data/project.json`). The raw files belong to Lumino and are not in this repository.
 - `src/engine/` holds the logic as plain functions: `ledger.ts` (job 1), `planner.ts` (job 2), `sets.ts` (job 3).
 - 33 tests cover the stock sums, the replay and the set check.
