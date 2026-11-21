@@ -3,10 +3,12 @@ import { ASSUMED_RATES, moneyView, type RateCard } from './engine/money'
 import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
 import { POLE, replay, summaries, type Selection } from './model'
 import { PlanIt } from './views/PlanIt'
+import { Yard } from './views/Yard'
 import { SeeIt } from './views/SeeIt'
 
 // The numbers are the brief's own: Lumino asked for three jobs, in this order.
 const TABS = [
+  { id: 'yard', label: 'The yard' },
   { id: 'see', label: '1  See it' },
   { id: 'plan', label: '2  Plan it' },
 ] as const
@@ -30,7 +32,7 @@ function storedRates(): RateCard {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<TabId>('see')
+  const [tab, setTab] = useState<TabId>('yard')
   const [sel, setSel] = useState<Selection>({ item: POLE, godown: -1, month: summaries[POLE].peakIdleMonth })
   const [settings, setSettings] = useState<PlanSettings>(DEFAULT_SETTINGS)
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
@@ -73,6 +75,19 @@ export default function App() {
       </header>
 
       <main>
+        {tab === 'yard' && (
+          <Yard
+            sel={sel}
+            set={set}
+            run={run}
+            money={money}
+            rates={rates}
+            open={(next) => {
+              if (next !== 'sets') setTab(next)
+              window.scrollTo({ top: 0 })
+            }}
+          />
+        )}
         {tab === 'see' && <SeeIt sel={sel} set={set} />}
         {tab === 'plan' && (
           <PlanIt

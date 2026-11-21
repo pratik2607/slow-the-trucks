@@ -35,8 +35,18 @@ export function ItemSelect({ value, onChange }: { value: string; onChange: (code
 }
 
 /** The month slider with a play button that walks through the project one month at a time. */
-export function Scrubber({ month, set }: { month: number; set: (month: number) => void }) {
+export function Scrubber({
+  month,
+  set,
+  restart = false,
+}: {
+  month: number
+  set: (month: number) => void
+  /** If true, the first press of play starts from the first month, wherever the marker is. */
+  restart?: boolean
+}) {
   const [playing, setPlaying] = useState(false)
+  const fresh = useRef(restart)
   const latest = useRef(set)
   latest.current = set
   const last = months.length - 1
@@ -45,18 +55,20 @@ export function Scrubber({ month, set }: { month: number; set: (month: number) =
     if (!playing) return
     if (month >= last) {
       setPlaying(false)
+      fresh.current = restart
       return
     }
     const id = window.setTimeout(() => latest.current(month + 1), 380)
     return () => window.clearTimeout(id)
-  }, [playing, month, last])
+  }, [playing, month, last, restart])
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3">
       <button
         type="button"
         onClick={() => {
-          if (!playing && month >= last) set(0)
+          if (!playing && (month >= last || fresh.current)) set(0)
+          fresh.current = false
           setPlaying((p) => !p)
         }}
         className="w-[7.5rem] shrink-0 rounded-md bg-ink px-3 py-1.5 text-[13px] font-semibold text-panel"
@@ -68,6 +80,7 @@ export function Scrubber({ month, set }: { month: number; set: (month: number) =
           month={month}
           set={(m) => {
             setPlaying(false)
+            fresh.current = false
             set(m)
           }}
         />
