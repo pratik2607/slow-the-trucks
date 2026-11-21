@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.vite/
+
+# secrets - never commit
+.env
+.env.*
+!.env.example
+
+# raw hackathon data pack (kept local, only derived aggregates are committed)
+data/raw/
+
+# python
+__pycache__/
+.venv/
+*.pyc
+
+# tooling / OS
+.vercel/
+.netlify/
+.DS_Store
+*.log
+.claude/
