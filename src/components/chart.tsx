@@ -74,6 +74,10 @@ interface TimeChartProps {
   yMax?: number
   /** Months to flag along the top edge, each with a reason shown on hover. */
   marks?: { month: number; label: string }[]
+  /** How a value reads in the hover box. Defaults to the quantity followed by the unit. */
+  format?: (value: number) => string
+  /** How an axis tick reads. */
+  tickFormat?: (value: number) => string
   /** Moments worth naming: a dashed line at the start of the month, with a short label. */
   notes?: { month: number; label: string }[]
   padLeft?: number
@@ -93,8 +97,11 @@ export function TimeChart({
   yMax,
   marks = NO_MARKS,
   notes = NO_MARKS,
+  format,
+  tickFormat = compact,
   padLeft = 48,
 }: TimeChartProps) {
+  const read = format ?? ((v: number) => `${qty(v)} ${unit}`)
   const [ref, width] = useWidth()
   const [hover, setHover] = useState<number | null>(null)
 
@@ -152,7 +159,7 @@ export function TimeChart({
               stroke={t === 0 ? 'var(--color-axis)' : 'var(--color-rule)'}
             />
             <text x={left - 6} y={y(t) + 3.5} textAnchor="end" fontSize={11} fill="var(--color-muted)" className="figures">
-              {compact(Math.abs(t))}
+              {tickFormat(Math.abs(t))}
             </text>
           </g>
         ))}
@@ -277,17 +284,13 @@ export function TimeChart({
             <div key={s.key} className="flex items-center gap-2">
               <span aria-hidden className="h-2 w-2 shrink-0 rounded-[2px]" style={{ background: s.color }} />
               <span className="text-ink-2">{s.label}</span>
-              <span className="figures ml-auto pl-3 font-medium">
-                {qty(s.values[hover])} {unit}
-              </span>
+              <span className="figures ml-auto pl-3 font-medium">{read(s.values[hover])}</span>
             </div>
           ))}
           {bands.length > 1 && (
             <div className="mt-1 flex border-t border-rule pt-1">
               <span className="text-ink-2">Together</span>
-              <span className="figures ml-auto pl-3 font-semibold">
-                {qty(bands[bands.length - 1].y1[hover])} {unit}
-              </span>
+              <span className="figures ml-auto pl-3 font-semibold">{read(bands[bands.length - 1].y1[hover])}</span>
             </div>
           )}
           {markAt && <div className="mt-1 border-t border-rule pt-1 text-critical">{markAt.label}</div>}

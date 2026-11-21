@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { ASSUMED_RATES, moneyView, type RateCard } from './engine/money'
 import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
 import { POLE, replay, summaries, type Selection } from './model'
 import { PlanIt } from './views/PlanIt'
@@ -11,12 +12,39 @@ const TABS = [
 ] as const
 type TabId = (typeof TABS)[number]['id']
 
+const RATES_KEY = 'slow-the-trucks.rates.v1'
+
+/** Rates someone typed in earlier on this device, if any. Falls back to the assumed card. */
+function storedRates(): RateCard {
+  try {
+    const raw = window.localStorage.getItem(RATES_KEY)
+    if (!raw) return ASSUMED_RATES
+    const saved = JSON.parse(raw) as Partial<RateCard>
+    return {
+      perUnit: { ...ASSUMED_RATES.perUnit, ...(saved.perUnit ?? {}) },
+      carryPerYear: typeof saved.carryPerYear === 'number' ? saved.carryPerYear : ASSUMED_RATES.carryPerYear,
+    }
+  } catch {
+    return ASSUMED_RATES
+  }
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabId>('see')
   const [sel, setSel] = useState<Selection>({ item: POLE, godown: -1, month: summaries[POLE].peakIdleMonth })
   const [settings, setSettings] = useState<PlanSettings>(DEFAULT_SETTINGS)
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
   const run = useMemo(() => replay(settings), [settings])
+  const [rates, setRatesState] = useState<RateCard>(storedRates)
+  const setRates = (next: RateCard) => {
+    setRatesState(next)
+    try {
+      window.localStorage.setItem(RATES_KEY, JSON.stringify(next))
+    } catch {
+      // Private window or blocked storage: the rates still apply for this visit.
+    }
+  }
+  const money = useMemo(() => moneyView(run.plans, rates), [run, rates])
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
@@ -47,7 +75,15 @@ export default function App() {
       <main>
         {tab === 'see' && <SeeIt sel={sel} set={set} />}
         {tab === 'plan' && (
-          <PlanIt sel={sel} set={set} run={run} setSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))} />
+          <PlanIt
+            sel={sel}
+            set={set}
+            run={run}
+            setSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))}
+            money={money}
+            rates={rates}
+            setRates={setRates}
+          />
         )}
       </main>
 

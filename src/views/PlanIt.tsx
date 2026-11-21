@@ -4,9 +4,11 @@ import { useMemo } from 'react'
 import { scaleLinear } from 'd3-scale'
 import { Legend, TimeChart, useWidth, type Series } from '../components/chart'
 import { Figure, ItemSelect, Panel, Scrubber, Segmented } from '../components/ui'
+import type { MoneyView, RateCard } from '../engine/money'
 import { planItem, scorePlan, type PlanSettings } from '../engine/planner'
 import { cover, godownShort, monthLabel, percent, qty, shortName, unitWord } from '../lib/format'
 import { godowns, months, project, type Replay, type Selection, type SetSelection } from '../model'
+import { MoneyPanel } from './MoneyPanel'
 
 const REAL = 'var(--color-real)'
 const PLAN = 'var(--color-plan)'
@@ -145,11 +147,17 @@ export function PlanIt({
   set,
   run,
   setSettings,
+  money,
+  rates,
+  setRates,
 }: {
   sel: Selection
   set: SetSelection
   run: Replay
   setSettings: (patch: Partial<PlanSettings>) => void
+  money: MoneyView
+  rates: RateCard
+  setRates: (next: RateCard) => void
 }) {
   const plan = run.plans[sel.item]
   const score = run.scores[sel.item]
@@ -357,6 +365,8 @@ export function PlanIt({
           </div>
         </Panel>
       </div>
+
+      <MoneyPanel money={money} rates={rates} setRates={setRates} month={m} setMonth={(month) => set({ month })} />
 
       <Panel
         title="How much buffer?"
