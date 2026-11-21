@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+/*
+  The look comes from the subject: cement and limewash for surfaces, the blue-black of
+  carbon-copy receipt ink for text. Chart colours are a validated set: blue is always the
+  plan, orange is always what really sat in the godowns, green is what sat with contractors.
+*/
+@theme {
+  --font-sans: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-cement: #eceeeb;
+  --color-panel: #fafbfa;
+  --color-ink: #17202b;
+  --color-ink-2: #4d5761;
+  --color-muted: #808a93;
+  --color-rule: #dde1de;
+  --color-axis: #b9c0bd;
+
+  --color-plan: #2a78d6;
+  --color-real: #eb6834;
+  --color-held: #1baf7a;
+
+  --color-critical: #d03b3b;
+  --color-warning: #fab219;
+  --color-good: #0ca30c;
+}
+
+@layer base {
+  html {
+    background: var(--color-cement);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-plan);
+    outline-offset: 2px;
+  }
+  button,
+  select,
+  input {
+    font: inherit;
+    color: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* Archivo is one family with a width axis: wide for headings, narrow for dense figures. */
+@utility wide {
+  font-stretch: 118%;
+}
+@utility narrow {
+  font-stretch: 86%;
+}
+@utility figures {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="range"] {
+  accent-color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
