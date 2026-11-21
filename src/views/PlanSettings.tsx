@@ -71,10 +71,10 @@ function Settings({ settings, set }: { settings: PlanSettings; set: (patch: Part
           className="mt-0.5 h-4 w-4 accent-ink"
         />
         <span>
-          <span className="font-semibold">The planner knows the project total</span>
+          <span className="font-semibold">Hold to the planned project quantity</span>
           <span className="mt-0.5 block text-[12.5px] text-ink-2">
-            A planner always knows the contract quantity. The data pack does not include it, so the stand-in is what
-            Lumino finally bought, and the plan never orders more than that.
+            Lumino orders to a fixed plan made months ahead, so each item's total is settled before work starts. The data pack does not state that total, so it
+            is taken as what the fixed plan delivered. The planner never orders beyond it. Switch this off if orders were placed as needs arose.
           </span>
         </span>
       </label>

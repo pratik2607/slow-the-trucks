@@ -38,8 +38,14 @@ export interface PlanSettings {
   /** Months of real history the planner waits for before it starts deciding. */
   warmup: number
   /**
-   * A planner always knows the contract quantity. The data pack does not include it, so the
-   * stand-in is what Lumino finally bought: with this on, the plan never orders more than that.
+   * Hold orders to the planned project quantity.
+   *
+   * Lumino's brief says material is ordered months ahead on a fixed plan, so each item's total is
+   * settled before work starts, and the delivery record agrees: poles arrived every month for 25
+   * months and then stopped, whatever the pile looked like. The data pack does not state the
+   * total, so it is taken as what the fixed plan delivered. This is the one place the replay
+   * reads a figure from the whole record; turn it off if orders were in fact placed as needs
+   * arose, and the planner will work from past usage alone.
    */
   knowsTotal: boolean
   /**
