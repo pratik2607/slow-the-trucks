@@ -13,6 +13,9 @@ describe('what the language model is sent', () => {
     expect(text).toContain('Feb 2025 | ')
     // the Overview's own figure for the service cable
     expect(text).toContain('Average idle so far: 2,77,517 actual, 90,563 plan (67% less)')
+    // the ranking is worked out for the model, not left to it
+    expect(text).toContain('biggest gain first: 1. Service cable, 1×25 sq mm (67% less); 2. Ring lug, 25 sq mm (61% less)')
+    expect(text).toContain('Items the site has had to wait for under the plan so far: none.')
   })
 
   it('never holds a month after the cut-off', () => {

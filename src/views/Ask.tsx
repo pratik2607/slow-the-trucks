@@ -1,6 +1,6 @@
 // Ask AI: a chat over the data. A question goes, with the records and the replay up to the cut-off
-// month, to a language model (Gemini on Vertex AI, through relay/server.js), which answers from
-// them. The app's own calculation runs first: it enforces the cut-off, hands the model checked
+// month, to a language model (through relay/server.js: OpenAI first, Gemini on Vertex AI standing
+// by), which answers from them. The app's own calculation runs first: it enforces the cut-off, hands the model checked
 // figures to build on, and is the answer shown if the model cannot be reached.
 
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
@@ -8,6 +8,7 @@ import { ask, NOUNS, type Answer, type Screen } from '../ask'
 import { monthLabel, shortName } from '../lib/format'
 import { askModel } from '../llm'
 import { months, project, type Replay, type Selection, type SetSelection } from '../model'
+import { Rich } from './parts/Rich'
 import { Card, PageHeader } from './parts/shared'
 
 export interface ChatLine {
@@ -20,6 +21,8 @@ export interface ChatLine {
   pending?: boolean
   /** Who wrote the answer shown: the language model, or the app's own calculation. */
   by: 'model' | 'app'
+  /** The model that answered, as the relay names it. */
+  model?: string
 }
 
 export function Ask({
@@ -83,7 +86,7 @@ export function Ask({
     if (local.beyond) return
     try {
       const reply = await askModel(question, run, asked, local.understood ? local.text : null, history)
-      setChat((c) => c.map((l) => (l.id === id ? { ...l, pending: false, by: 'model', answer: { ...local, understood: true, text: reply.text } } : l)))
+      setChat((c) => c.map((l) => (l.id === id ? { ...l, pending: false, by: 'model', model: reply.model, answer: { ...local, understood: true, text: reply.text } } : l)))
     } catch {
       setChat((c) => c.map((l) => (l.id === id ? { ...l, pending: false } : l)))
     }
@@ -95,7 +98,7 @@ export function Ask({
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Ask AI" job="Gemini on Vertex AI">
+      <PageHeader title="Ask AI" job="Language model">
         Ask about the data in plain words. A language model reads Lumino's records and the replay, up to the cut-off month, and answers from them.
       </PageHeader>
 
@@ -127,7 +130,7 @@ export function Ask({
                 </div>
               ) : (
                 <div className={`mr-auto max-w-[85%] rounded-2xl rounded-bl-md px-4 py-3 text-[14.5px] leading-relaxed ${line.answer.understood && !line.answer.beyond ? 'bg-cement' : 'bg-wait-soft'}`}>
-                  <p className="whitespace-pre-line">{line.answer.text}</p>
+                  <Rich text={line.answer.text} />
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
                     {line.answer.see && (
                       <button type="button" onClick={() => open(line.answer.see!.screen)} className="text-[13.5px] font-semibold text-plan">
@@ -136,7 +139,7 @@ export function Ask({
                     )}
                     <span className="text-[12px] text-muted">
                       {line.by === 'model'
-                        ? `Gemini, from records up to ${monthLabel(months[line.asOf])}`
+                        ? `${line.model ?? 'Language model'}, from records up to ${monthLabel(months[line.asOf])}`
                         : line.answer.beyond
                           ? `records up to ${monthLabel(months[line.asOf])}`
                           : `worked out by the app, records up to ${monthLabel(months[line.asOf])}: the model could not be reached`}

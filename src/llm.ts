@@ -1,8 +1,8 @@
 // Ask AI's language model. From the same records and replay every other screen uses, the page
 // writes out a plain-text sheet of everything up to the cut-off month and sends it, with the
-// question, to a small relay (relay/server.js) that asks Gemini on Vertex AI. Nothing after the
-// cut-off month is ever written into that sheet, so the model cannot see past it. The page holds
-// no key.
+// question, to a small relay (relay/server.js) that asks a language model: OpenAI's low-cost one
+// first, Gemini on Vertex AI if that fails. Nothing after the cut-off month is ever written into
+// that sheet, so the model cannot see past it. The page holds no key.
 
 import { godownShort, monthLabel, percent, qty, shortName, unitWord } from './lib/format'
 import { godowns, ledgers, months, project, type Replay } from './model'
@@ -31,6 +31,8 @@ export function buildContext(run: Replay, cutoff: number): string {
     'SUMMARY SO FAR (one paragraph per item)',
   ]
   const started = project.items.filter((item) => ledgers[item.code].firstMonth <= cutoff)
+  const ranked: { name: string; cut: number }[] = []
+  const waitedFor: string[] = []
   for (const item of project.items) {
     const l = ledgers[item.code]
     const p = run.plans[item.code]
@@ -48,6 +50,8 @@ export function buildContext(run: Replay, cutoff: number): string {
     let waited = 0
     for (let m = first; m <= cutoff; m++) if (p.waiting[m] > 0) waited++
     const d = p.decisions[cutoff]
+    ranked.push({ name: shortName(item), cut: realAvg > 0 ? 1 - planAvg / realAvg : 0 })
+    if (waited > 0) waitedFor.push(`${shortName(item)} (${waited} ${waited === 1 ? 'month' : 'months'})`)
     out.push(
       `${name}: delivered so far ${qty(total(p.realDelivered, 0, cutoff))} actual, ${qty(total(p.delivered, 0, cutoff))} plan; used by the site so far ${qty(total(l.used, 0, cutoff))}. ` +
         `Idle now: ${qty(p.realIdle[cutoff])} actual (${qty(l.inGodowns[cutoff])} in godowns, ${qty(l.withContractors[cutoff])} with contractors), ${qty(p.idle[cutoff])} plan. ` +
@@ -57,6 +61,10 @@ export function buildContext(run: Replay, cutoff: number): string {
         `This month the plan ${!d.active ? 'is still only watching' : d.ordered > 0 ? `orders ${qty(d.ordered)}` : 'orders nothing and holds'}.`,
     )
   }
+  // The order is worked out here, so the model reads a ranking instead of sorting sixteen items itself.
+  ranked.sort((x, y) => y.cut - x.cut)
+  out.push('', `ITEMS RANKED by how much less idle stock the plan holds on average so far, biggest gain first: ${ranked.map((r, i) => `${i + 1}. ${r.name} (${gap(r.cut)})`).join('; ')}.`)
+  out.push(`Items the site has had to wait for under the plan so far: ${waitedFor.length ? waitedFor.join('; ') : 'none'}.`)
   out.push('', 'MONTH BY MONTH (one table per item; columns: month, delivered actual, delivered plan, used by site, idle actual, idle plan, plan order placed, site waiting under plan)')
   for (const item of started) {
     const l = ledgers[item.code]
@@ -81,9 +89,9 @@ export async function askModel(question: string, run: Replay, cutoff: number, ch
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question, asOf: monthLabel(months[cutoff]), data, history }),
-    signal: AbortSignal.timeout(22_000),
+    signal: AbortSignal.timeout(30_000),
   })
   const body = (await res.json().catch(() => ({}))) as { text?: string; model?: string; error?: string }
   if (!res.ok || !body.text) throw new Error(body.error ?? `HTTP ${res.status}`)
-  return { text: body.text, model: body.model ?? 'Gemini' }
+  return { text: body.text, model: body.model ?? 'language model' }
 }
