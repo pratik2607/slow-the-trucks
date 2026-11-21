@@ -134,7 +134,7 @@ export function Flow({ sel, run, play }: { sel: Selection; run: Replay; play: Pl
             {fewer >= per ? <Badge tone="saved">{qty(fewer)} fewer lying unused</Badge> : waiting > 1e-6 ? <Badge tone="wait">site waiting</Badge> : <Badge>about the same</Badge>}
           </div>
           <div className="mt-4 grid gap-5 sm:grid-cols-2">
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-1.5 text-[13px] text-ink-2">
                 <Dot color={ACTUAL} /> Actual
               </div>
@@ -142,11 +142,11 @@ export function Flow({ sel, run, play }: { sel: Selection; run: Replay; play: Pl
               <div className="mt-1.5 text-[12.5px] text-muted">
                 {usage ? `${qty(l.inGodowns[m])} in godowns, ${qty(l.withContractors[m])} with contractors` : `${unit} in godowns`}
               </div>
-              <div className="mt-3">
+              <div className="mt-auto pt-3">
                 <Pile filled={idleActual / per} slots={slots} color={ACTUAL} label={`${qty(idleActual)} ${unit} lying unused in reality`} />
               </div>
             </div>
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-1.5 text-[13px] text-ink-2">
                 <Dot color={PLAN} /> Our plan
               </div>
@@ -154,13 +154,13 @@ export function Flow({ sel, run, play }: { sel: Selection; run: Replay; play: Pl
               <div className="mt-1.5 text-[12.5px] text-muted">
                 {usage ? `${unit}, in godowns or with contractors` : `${unit} in godowns`}
               </div>
-              <div className="mt-3">
+              <div className="mt-auto pt-3">
                 <Pile filled={idlePlan / per} slots={slots} color={PLAN} label={`${qty(idlePlan)} ${unit} lying unused in the plan`} />
               </div>
             </div>
           </div>
           <p className="mt-3 text-[12px] text-muted">
-            Each mark is {qty(per)} {unit}. Both yards are drawn to the size of the real pile at its worst.
+            Each mark is {qty(per)} {unit}. Both yards stand on the same line and are drawn to the size of the real pile at its worst, so the taller one holds more.
           </p>
         </Card>
 

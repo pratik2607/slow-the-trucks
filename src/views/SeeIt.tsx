@@ -27,7 +27,7 @@ function ItemsTable({ sel, set }: { sel: Selection; set: SetSelection }) {
           <tr className="text-left text-[12.5px] text-ink-2">
             <th className="py-1.5 pl-4 pr-3 font-medium">Item</th>
             <th className="px-3 py-1.5 text-right font-medium">Arrives in</th>
-            <th className="px-3 py-1.5 font-medium">Held on average, in months of usage</th>
+            <th className="px-3 py-1.5 font-medium">Average stock held, in months of work</th>
             <th className="px-3 py-1.5 text-right font-medium">Most ever idle</th>
             <th className="px-3 py-1.5 text-right font-medium">Received</th>
             <th className="px-3 py-1.5 text-right font-medium">Used</th>
@@ -68,7 +68,7 @@ function ItemsTable({ sel, set }: { sel: Selection; set: SetSelection }) {
                         title={`Lead time: ${leadMonths} months`}
                       />
                     </div>
-                    <span className="figures narrow font-semibold">{cover(s.avgCoverMonths)}</span>
+                    <span className="figures narrow font-semibold">{cover(s.avgCoverMonths)} months</span>
                   </div>
                 </td>
                 <td className="figures narrow px-3 py-1.5 text-right">
@@ -207,7 +207,7 @@ export function SeeIt({ sel, set }: { sel: Selection; set: SetSelection }) {
       <Panel
         flush
         title="All 16 items, worst first"
-        note="The bar is how much stock sat idle on average, counted in months of real usage. The black tick is how long a fresh order takes to arrive. A bar far past its tick is stock nobody was waiting for."
+        note="Each bar is how long the average pile of that item would have lasted at the pace the site was really using it. The black tick is how long a fresh order takes to arrive. A bar far past its tick is stock nobody was waiting for."
       >
         <ItemsTable sel={sel} set={set} />
       </Panel>
