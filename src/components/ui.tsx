@@ -1,6 +1,80 @@
+import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { monthLabel } from '../lib/format'
-import { months } from '../model'
+import { monthLabel, shortName } from '../lib/format'
+import { months, project } from '../model'
+
+const ITEM_GROUPS = [
+  ['Independent', 'Items'],
+  ['Parent', 'Sets'],
+  ['Child', 'Parts of a set'],
+] as const
+
+export function ItemSelect({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  return (
+    <label className="flex items-center gap-2 text-[13px] text-ink-2">
+      <span>Item</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-rule bg-panel px-2 py-1.5 text-[14px] font-semibold text-ink"
+      >
+        {ITEM_GROUPS.map(([role, label]) => (
+          <optgroup key={role} label={label}>
+            {project.items
+              .filter((i) => i.role === role)
+              .map((i) => (
+                <option key={i.code} value={i.code}>
+                  {shortName(i)}
+                </option>
+              ))}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+/** The month slider with a play button that walks through the project one month at a time. */
+export function Scrubber({ month, set }: { month: number; set: (month: number) => void }) {
+  const [playing, setPlaying] = useState(false)
+  const latest = useRef(set)
+  latest.current = set
+  const last = months.length - 1
+
+  useEffect(() => {
+    if (!playing) return
+    if (month >= last) {
+      setPlaying(false)
+      return
+    }
+    const id = window.setTimeout(() => latest.current(month + 1), 380)
+    return () => window.clearTimeout(id)
+  }, [playing, month, last])
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-3">
+      <button
+        type="button"
+        onClick={() => {
+          if (!playing && month >= last) set(0)
+          setPlaying((p) => !p)
+        }}
+        className="w-[7.5rem] shrink-0 rounded-md bg-ink px-3 py-1.5 text-[13px] font-semibold text-panel"
+      >
+        {playing ? 'Pause' : 'Play the replay'}
+      </button>
+      <div className="min-w-0 flex-1">
+        <MonthPicker
+          month={month}
+          set={(m) => {
+            setPlaying(false)
+            set(m)
+          }}
+        />
+      </div>
+    </div>
+  )
+}
 
 export function Panel({
   title,

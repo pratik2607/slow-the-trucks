@@ -74,6 +74,8 @@ interface TimeChartProps {
   yMax?: number
   /** Months to flag along the top edge, each with a reason shown on hover. */
   marks?: { month: number; label: string }[]
+  /** Moments worth naming: a dashed line at the start of the month, with a short label. */
+  notes?: { month: number; label: string }[]
   padLeft?: number
 }
 
@@ -90,6 +92,7 @@ export function TimeChart({
   onCursor,
   yMax,
   marks = NO_MARKS,
+  notes = NO_MARKS,
   padLeft = 48,
 }: TimeChartProps) {
   const [ref, width] = useWidth()
@@ -216,6 +219,27 @@ export function TimeChart({
         {marks.map((k) => (
           <rect key={k.month} x={cx(k.month) - barWidth / 2} y={PAD_TOP - 8} width={barWidth} height={5} rx={1} fill="var(--color-critical)" />
         ))}
+        {notes.map((note, i) => {
+          const nx = left + note.month * step
+          const flipLabel = nx > left + innerW * 0.7
+          return (
+            <g key={note.label}>
+              <line x1={nx} x2={nx} y1={PAD_TOP} y2={PAD_TOP + innerH} stroke="var(--color-ink-2)" strokeDasharray="3 3" />
+              <text
+                x={flipLabel ? nx - 5 : nx + 5}
+                y={PAD_TOP + 11 + i * 14}
+                textAnchor={flipLabel ? 'end' : 'start'}
+                fontSize={11.5}
+                fill="var(--color-ink-2)"
+                stroke="var(--color-panel)"
+                strokeWidth={3}
+                paintOrder="stroke"
+              >
+                {note.label}
+              </text>
+            </g>
+          )
+        })}
 
         {hover !== null && (
           <line x1={cx(hover)} x2={cx(hover)} y1={PAD_TOP} y2={PAD_TOP + innerH} stroke="var(--color-muted)" strokeDasharray="2 3" />
