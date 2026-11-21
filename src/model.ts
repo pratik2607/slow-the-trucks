@@ -3,6 +3,7 @@
 import { project } from './data'
 import { itemLedger, summarise, type ItemLedger, type ItemSummary } from './engine/ledger'
 import { planItem, scorePlan, type ItemPlan, type PlanScore, type PlanSettings } from './engine/planner'
+import { checkSets } from './engine/sets'
 
 export { project }
 
@@ -46,3 +47,6 @@ export function replay(settings: PlanSettings): Replay {
   }
   return { settings, plans, scores }
 }
+
+/** The set check on its default footing: the ratio the site actually used, everything sent to each godown. */
+export const setsCheck = checkSets(project, 'usage')

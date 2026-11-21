@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import { Legend, plotLeft, TimeChart, useWidth, type Series } from '../components/chart'
 import { MonthPicker, Panel, Segmented } from '../components/ui'
-import { checkSets, ratioKey, SHORT_BELOW, SURPLUS_ABOVE, type Lens, type RatioBasis, type SetsCheck } from '../engine/sets'
+import { checkSets, ratioKey, remedyOf, SHORT_BELOW, SURPLUS_ABOVE, type Lens, type RatioBasis, type Remedy } from '../engine/sets'
 import { godownShort, monthLabel, qty, shortName, unitWord } from '../lib/format'
 import { godowns, months, project, type Selection, type SetSelection } from '../model'
 
@@ -20,7 +20,7 @@ const PLURAL: Record<string, string> = {
 /** A small ratio keeps its significant digits: 0.0000862 tonnes, not 0. */
 const ratioText = (x: number) => (x >= 0.01 ? qty(x) : String(Number(x.toPrecision(3))))
 
-type Kind = 'empty' | 'ok' | 'move' | 'order' | 'surplus'
+type Kind = Remedy
 
 const KINDS: Record<Kind, { label: string; color: string }> = {
   ok: { label: 'In balance', color: '#b3bcc3' },
@@ -30,14 +30,7 @@ const KINDS: Record<Kind, { label: string; color: string }> = {
   empty: { label: 'Nothing sent yet', color: 'var(--color-rule)' },
 }
 
-/** A short godown is a transfer problem if the project as a whole has the part, an order problem if not. */
-function kindOf(check: SetsCheck, si: number, g: number, m: number): Kind {
-  const b = check.balance[si][g][m]
-  if (b.status !== 'short') return b.status
-  const shortHere = b.parts.filter((p) => p.status === 'short').map((p) => p.child)
-  const shortEverywhere = check.pooled[si][m].parts.some((p) => shortHere.includes(p.child) && p.status === 'short')
-  return shortEverywhere ? 'order' : 'move'
-}
+const kindOf = remedyOf
 
 function StatusRows({
   kinds,
@@ -167,7 +160,8 @@ export function Sets({ sel, set }: { sel: Selection; set: SetSelection }) {
 
   return (
     <div className="grid gap-4">
-      <p className="max-w-[80ch] text-[15px]">
+      <h2 className="wide text-[24px] font-bold leading-tight">Set check</h2>
+      <p className="-mt-2 max-w-[80ch] text-[15px]">
         A pole clamp is no use without its eye hook and its bolts. If one part runs short, the whole set waits, however
         much of the rest is lying in the store. For each of Lumino's three sets this checks every godown and every month:
         of the parents sent there, how many could actually be fitted out with the parts sent alongside?

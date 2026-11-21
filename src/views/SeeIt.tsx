@@ -200,6 +200,13 @@ export function SeeIt({ sel, set }: { sel: Selection; set: SetSelection }) {
 
   return (
     <div className="grid gap-4">
+      <div>
+        <h2 className="wide text-[24px] font-bold leading-tight">Stock register</h2>
+        <p className="mt-1 max-w-[76ch] text-[14.5px] text-ink-2">
+          What came in, what went to contractors, what was used and what sat idle: every item, every godown, every month.
+          Pick an item in the table, then a godown.
+        </p>
+      </div>
       <Panel
         flush
         title="All 16 items, worst first"

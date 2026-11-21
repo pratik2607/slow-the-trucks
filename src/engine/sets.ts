@@ -267,3 +267,15 @@ export function checkSets(
     counts,
   }
 }
+
+/** What a godown-month needs: nothing, a transfer, an order, or it simply holds parts ahead of parents. */
+export type Remedy = 'empty' | 'ok' | 'move' | 'order' | 'surplus'
+
+/** A short godown is a transfer problem if the project as a whole has the part, an order problem if not. */
+export function remedyOf(check: SetsCheck, set: number, godown: number, month: number): Remedy {
+  const b = check.balance[set][godown][month]
+  if (b.status !== 'short') return b.status
+  const shortHere = b.parts.filter((p) => p.status === 'short').map((p) => p.child)
+  const shortEverywhere = check.pooled[set][month].parts.some((p) => shortHere.includes(p.child) && p.status === 'short')
+  return shortEverywhere ? 'order' : 'move'
+}

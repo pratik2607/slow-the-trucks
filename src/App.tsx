@@ -3,18 +3,23 @@ import { ASSUMED_RATES, moneyView, type RateCard } from './engine/money'
 import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
 import { POLE, replay, summaries, type Selection } from './model'
 import { PlanIt } from './views/PlanIt'
-import { Yard } from './views/Yard'
+import { ThePlan } from './views/ThePlan'
 import { SeeIt } from './views/SeeIt'
 import { Sets } from './views/Sets'
 
-// The numbers are the brief's own: Lumino asked for three jobs, in this order.
-const TABS = [
-  { id: 'yard', label: 'The yard' },
-  { id: 'see', label: '1  See it' },
-  { id: 'plan', label: '2  Plan it' },
-  { id: 'sets', label: '3  Match the sets' },
+// One page tells the whole story. The other three are its working, numbered as Lumino's brief
+// numbers its three jobs: see it, plan it, match the sets.
+const WORKING = [
+  { id: 'see', label: '1  Stock register' },
+  { id: 'plan', label: '2  Replay in detail' },
+  { id: 'sets', label: '3  Set check' },
 ] as const
-type TabId = (typeof TABS)[number]['id']
+type TabId = 'home' | (typeof WORKING)[number]['id']
+
+const fromHash = (): TabId => {
+  const h = window.location.hash.replace('#', '')
+  return h === 'see' || h === 'plan' || h === 'sets' ? h : 'home'
+}
 
 const RATES_KEY = 'slow-the-trucks.rates.v1'
 
@@ -34,7 +39,12 @@ function storedRates(): RateCard {
 }
 
 export default function App() {
-  const [tab, setTab] = useState<TabId>('yard')
+  const [tab, setTabState] = useState<TabId>(fromHash)
+  const setTab = (next: TabId) => {
+    setTabState(next)
+    window.history.replaceState(null, '', next === 'home' ? window.location.pathname : `#${next}`)
+    window.scrollTo({ top: 0 })
+  }
   const [sel, setSel] = useState<Selection>({ item: POLE, godown: -1, month: summaries[POLE].peakIdleMonth })
   const [settings, setSettings] = useState<PlanSettings>(DEFAULT_SETTINGS)
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
@@ -56,17 +66,26 @@ export default function App() {
         <div>
           <h1 className="wide text-[26px] font-extrabold leading-none tracking-[-0.01em]">Slow the Trucks</h1>
           <p className="mt-1.5 max-w-[62ch] text-[13.5px] text-ink-2">
-            Lumino's Kanpur power line project, replayed on 44 months of its own stock records.
+            Tells Lumino's stores what to order, hold and move each month, from what the site actually used.
           </p>
         </div>
-        <nav aria-label="Views" className="flex flex-wrap gap-1">
-          {TABS.map((t) => (
+        <nav aria-label="Views" className="flex flex-wrap items-center gap-x-1 gap-y-1.5">
+          <button
+            type="button"
+            aria-current={tab === 'home' ? 'page' : undefined}
+            onClick={() => setTab('home')}
+            className={`rounded-md px-3 py-1.5 text-[14px] ${tab === 'home' ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-panel'}`}
+          >
+            The plan
+          </button>
+          <span className="ml-3 mr-1 text-[12.5px] text-muted">The working</span>
+          {WORKING.map((t) => (
             <button
               key={t.id}
               type="button"
               aria-current={t.id === tab ? 'page' : undefined}
               onClick={() => setTab(t.id)}
-              className={`rounded-md px-3 py-1.5 text-[14px] whitespace-pre ${
+              className={`rounded-md px-2.5 py-1.5 text-[13.5px] whitespace-pre ${
                 t.id === tab ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-panel'
               }`}
             >
@@ -77,19 +96,7 @@ export default function App() {
       </header>
 
       <main>
-        {tab === 'yard' && (
-          <Yard
-            sel={sel}
-            set={set}
-            run={run}
-            money={money}
-            rates={rates}
-            open={(next) => {
-              setTab(next)
-              window.scrollTo({ top: 0 })
-            }}
-          />
-        )}
+        {tab === 'home' && <ThePlan sel={sel} set={set} run={run} money={money} rates={rates} open={setTab} />}
         {tab === 'see' && <SeeIt sel={sel} set={set} />}
         {tab === 'plan' && (
           <PlanIt

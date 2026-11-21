@@ -210,9 +210,17 @@ export function PlanIt({
 
   return (
     <div className="grid gap-4">
+      <div>
+        <h2 className="wide text-[24px] font-bold leading-tight">Replay in detail</h2>
+        <p className="mt-1 max-w-[76ch] text-[14.5px] text-ink-2">
+          One item at a time: the plan next to reality, the reasoning for any month, and the settings behind it.
+        </p>
+      </div>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <ItemSelect value={sel.item} onChange={(item) => set({ item })} />
-        <Scrubber month={m} set={(month) => set({ month })} />
+        <div className="flex w-full min-w-0 md:w-auto md:flex-1">
+          <Scrubber month={m} set={(month) => set({ month })} />
+        </div>
       </div>
 
       <p className="max-w-[80ch] text-[15px]">
