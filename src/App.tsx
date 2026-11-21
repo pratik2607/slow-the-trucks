@@ -5,12 +5,14 @@ import { POLE, replay, summaries, type Selection } from './model'
 import { PlanIt } from './views/PlanIt'
 import { Yard } from './views/Yard'
 import { SeeIt } from './views/SeeIt'
+import { Sets } from './views/Sets'
 
 // The numbers are the brief's own: Lumino asked for three jobs, in this order.
 const TABS = [
   { id: 'yard', label: 'The yard' },
   { id: 'see', label: '1  See it' },
   { id: 'plan', label: '2  Plan it' },
+  { id: 'sets', label: '3  Match the sets' },
 ] as const
 type TabId = (typeof TABS)[number]['id']
 
@@ -83,7 +85,7 @@ export default function App() {
             money={money}
             rates={rates}
             open={(next) => {
-              if (next !== 'sets') setTab(next)
+              setTab(next)
               window.scrollTo({ top: 0 })
             }}
           />
@@ -100,6 +102,7 @@ export default function App() {
             setRates={setRates}
           />
         )}
+        {tab === 'sets' && <Sets sel={sel} set={set} />}
       </main>
 
       <footer className="mt-10 max-w-[80ch] text-[12.5px] text-muted">
