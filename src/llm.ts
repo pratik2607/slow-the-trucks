@@ -40,9 +40,9 @@ export function buildContext(run: Replay, cutoff: number): string {
       continue
     }
     const first = l.firstMonth
-    const n = cutoff - first + 1
-    const realAvg = total(p.realIdle, first, cutoff) / n
-    const planAvg = total(p.idle, first, cutoff) / n
+    // Averaged over every month so far, the way the Overview counts it, so the two screens agree.
+    const realAvg = total(p.realIdle, 0, cutoff) / (cutoff + 1)
+    const planAvg = total(p.idle, 0, cutoff) / (cutoff + 1)
     let worst = first
     for (let m = first; m <= cutoff; m++) if (p.realIdle[m] > p.realIdle[worst]) worst = m
     let waited = 0

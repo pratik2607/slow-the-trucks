@@ -11,6 +11,8 @@ describe('what the language model is sent', () => {
     const text = buildContext(run, months.length - 1)
     expect(text).toContain('Worst month so far: Feb 2025, 48,991 actual, 18,978 plan')
     expect(text).toContain('Feb 2025 | ')
+    // the Overview's own figure for the service cable
+    expect(text).toContain('Average idle so far: 2,77,517 actual, 90,563 plan (67% less)')
   })
 
   it('never holds a month after the cut-off', () => {
