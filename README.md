@@ -31,9 +31,9 @@ Everything is counted in quantities. Lumino's records carry no prices, so the ap
 | 2. Plan it: replay the project, seeing only what was known at each date | Overview, Monthly sheet, Item replay |
 | 3. Match the sets: flag every month a set is out of balance, in any godown | Set check |
 
-## Ask AI
+## Ask AI (demo)
 
-A chat over the data. It reads the item, month and godown out of a plain question and works the answer out from the records and the replay, in the browser. It does not call a language model, so there is no key and it cannot make a figure up: an answer is what the data says, or a plain "I can't answer that".
+A chat over the data. In this demo it answers a set of common questions from the records and the replay: idle stock, what to order, deliveries, usage, the worst month, lead times, what the plan saves and which sets are out of balance. A language model is planned behind the same screen.
 
 It has a data cut-off month. It answers as if that month were today, declines anything later, and stops its totals and averages there. Moving the cut-off forward is the only way to let it see more.
 

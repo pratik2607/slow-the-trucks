@@ -22,7 +22,7 @@ const NAV = [
   },
   {
     group: 'Ask',
-    items: [{ id: 'ask', label: 'Ask AI', icon: 'M4 4.5h12v8.5H9.5L6 16v-3H4z' }],
+    items: [{ id: 'ask', label: 'Ask AI', tag: 'Demo', icon: 'M4 4.5h12v8.5H9.5L6 16v-3H4z' }],
   },
   {
     group: 'Records',
@@ -103,6 +103,9 @@ export default function App() {
                       <path d={item.icon} />
                     </svg>
                     {item.label}
+                    {'tag' in item && (
+                      <span className={`ml-auto rounded-full px-2 py-px text-[11.5px] font-normal ${active ? 'bg-panel/20 text-panel' : 'bg-cement text-ink-2'}`}>{item.tag}</span>
+                    )}
                   </button>
                 )
               })}

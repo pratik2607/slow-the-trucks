@@ -1,6 +1,7 @@
-// Ask AI: a chat over the data. It reads the item, month and godown out of a question and works
-// the answer out from Lumino's records and the replay, in the browser. It has a cut-off month:
-// it answers as if that month were today and cannot see anything after it.
+// Ask AI (demo): a chat over the data. In this demo a question is matched to an item, a month, a
+// godown and a kind of question, and answered from Lumino's records and the replay. A language
+// model is planned behind the same screen. It has a cut-off month: it answers as if that month
+// were today and cannot see anything after it.
 
 import { useEffect, useRef, useState } from 'react'
 import { ask, NOUNS, type Answer, type Screen } from '../ask'
@@ -73,9 +74,8 @@ export function Ask({
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Ask AI">
-        Ask about the data in plain words. It reads the item, month and godown from your question and works the answer out from Lumino's records and the replay, here in
-        your browser. It does not generate text from a language model, so it cannot make a figure up: an answer is what the data says, or a plain "I can't answer that".
+      <PageHeader title="Ask AI" job="Demo">
+        Ask about the data in plain words. This demo answers a set of common questions from Lumino's records and the replay.
       </PageHeader>
 
       <Card className="flex flex-wrap items-center gap-x-6 gap-y-3 px-5 py-4">
