@@ -1,4 +1,4 @@
-// Pieces shared by the sections of the main page.
+// Pieces shared by the plan screens.
 //
 // Two colours carry all the meaning on this page: one for what actually happened, one for our
 // plan. Every figure is shown as that pair, so nothing has to be learned twice.
@@ -48,22 +48,32 @@ export function Pair({ actual, plan, tall = false }: { actual: number; plan: num
   )
 }
 
-/** A section is one question, answered. */
-export function Section({ id, n, question, lead, aside, children }: { id: string; n: number; question: string; lead?: ReactNode; aside?: ReactNode; children: ReactNode }) {
+/** A titled block inside a screen. */
+export function Block({ id, title, lead, aside, children }: { id?: string; title: string; lead?: ReactNode; aside?: ReactNode; children: ReactNode }) {
   return (
     <section id={id} className="scroll-mt-24">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div className="max-w-[68ch]">
-          <h2 className="flex items-center gap-3">
-            <span className="figures flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-[13px] font-bold text-panel">{n}</span>
-            <span className="wide text-[23px] font-bold leading-tight tracking-[-0.01em]">{question}</span>
-          </h2>
-          {lead && <p className="mt-2 text-[15px] leading-relaxed text-ink-2">{lead}</p>}
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <div className="max-w-[70ch]">
+          <h3 className="text-[17px] font-bold leading-tight">{title}</h3>
+          {lead && <p className="mt-1 text-[13.5px] leading-relaxed text-ink-2">{lead}</p>}
         </div>
         {aside}
       </div>
       {children}
     </section>
+  )
+}
+
+/** The top of every screen: its name, what it holds, and which of Lumino's three jobs it answers. */
+export function PageHeader({ title, job, children }: { title: string; job?: string; children?: ReactNode }) {
+  return (
+    <header>
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="wide text-[26px] font-extrabold leading-tight tracking-[-0.015em]">{title}</h2>
+        {job && <span className="rounded-full border border-rule bg-panel px-2.5 py-0.5 text-[12.5px] text-ink-2">{job}</span>}
+      </div>
+      {children && <p className="mt-1.5 max-w-[72ch] text-[14.5px] leading-relaxed text-ink-2">{children}</p>}
+    </header>
   )
 }
 

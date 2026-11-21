@@ -1,4 +1,4 @@
-// Section 1: the answer. What the plan saves against what actually happened, in quantities only:
+// The answer. What the plan saves against what actually happened, in quantities only:
 // Lumino's records carry no prices, so nothing here is counted in money.
 
 import { percent } from '../../lib/format'

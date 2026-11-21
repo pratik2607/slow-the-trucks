@@ -1,4 +1,4 @@
-// Section 2: follow the material. Vendor, godown, contractor, site: the route everyone at Lumino
+// Follow the material. Vendor, godown, contractor, site: the route everyone at Lumino
 // already knows, shown for one month in both worlds. The site figure is the same in both, which
 // is the point: the plan changes where material waits, never how much work gets done.
 
@@ -6,8 +6,8 @@ import type { ReactNode } from 'react'
 import { Pile, unitsPerMark } from '../../components/pile'
 import { Badge, Chip, type Playback } from '../../components/ui'
 import { monthLabel, qty, shortName, unitWord } from '../../lib/format'
-import { ledgers, months, POLE, project, type Replay, type Selection } from '../../model'
-import { ACTUAL, Card, Dot, PLAN, place, reason, Section, StationIcon } from './shared'
+import { ledgers, months, project, type Replay, type Selection } from '../../model'
+import { ACTUAL, Card, Dot, PLAN, place, reason, StationIcon } from './shared'
 
 function Arrow() {
   return (
@@ -103,16 +103,7 @@ export function Flow({ sel, run, play }: { sel: Selection; run: Replay; play: Pl
                 : 'The two worlds are close this month, and the site has everything it needs.'
 
   return (
-    <Section
-      id="flow"
-      n={2}
-      question="Where does the material sit?"
-      lead={
-        sel.item === POLE
-          ? "Lumino's brief tells of 1,700 poles lying idle because nobody slowed the trucks. Its own records show the pile reached 48,991. Follow them from vendor to site, month by month, in both worlds."
-          : `Idle stock of ${name} peaked at ${qty(plan.realIdle[peakMonth])} ${unit} in ${monthLabel(months[peakMonth])}. Follow it from vendor to site, month by month, in both worlds.`
-      }
-    >
+    <div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="mr-1 text-[13px] text-ink-2">Jump to</span>
         {moments.map((k) => (
@@ -238,6 +229,6 @@ export function Flow({ sel, run, play }: { sel: Selection; run: Replay; play: Pl
           </p>
         </div>
       </Card>
-    </Section>
+    </div>
   )
 }

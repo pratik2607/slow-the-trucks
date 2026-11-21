@@ -1,19 +1,18 @@
-// Section 4: every item, actual against plan. This is the evidence, so it is never hidden.
+// Every item, actual against plan. This is the evidence, so it is never hidden.
 
 import { Badge } from '../../components/ui'
 import { percent, qty, shortName, unitWord } from '../../lib/format'
-import { project, type Replay, type Selection, type SetSelection } from '../../model'
-import { Card, Key, Pair, Section } from './shared'
+import { project, type Replay, type Selection } from '../../model'
+import { Block, Card, Key, Pair } from './shared'
 
-export function Scoreboard({ sel, set, run }: { sel: Selection; set: SetSelection; run: Replay }) {
+export function Scoreboard({ sel, run, openItem }: { sel: Selection; run: Replay; openItem: (code: string) => void }) {
   const rows = [...project.items].sort((a, b) => run.scores[b.code].idleCut - run.scores[a.code].idleCut)
 
   return (
-    <Section
+    <Block
       id="items"
-      n={4}
-      question="Which items gain most?"
-      lead="All 16 items, actual against our plan: the average stock lying idle over the whole project. Pick a row to follow that item above."
+      title="All 16 items"
+      lead="Average stock lying idle over the whole project, actual against our plan. Open a row to replay that item."
       aside={<Key />}
     >
       <Card>
@@ -26,10 +25,7 @@ export function Scoreboard({ sel, set, run }: { sel: Selection; set: SetSelectio
               key={item.code}
               type="button"
               aria-pressed={selected}
-              onClick={() => {
-                set({ item: item.code })
-                document.getElementById('flow')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
+              onClick={() => openItem(item.code)}
               className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-2 border-t border-rule px-5 py-3 text-left first:border-t-0 hover:bg-cement/60 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_minmax(0,12rem)_6rem] ${
                 selected ? 'bg-cement/70' : ''
               }`}
@@ -55,6 +51,6 @@ export function Scoreboard({ sel, set, run }: { sel: Selection; set: SetSelectio
         Items showing no gain were bought almost entirely before the first unit was used. A planner that learns from usage cannot undo an order placed before
         there was any usage to learn from.
       </p>
-    </Section>
+    </Block>
   )
 }

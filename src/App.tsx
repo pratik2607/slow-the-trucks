@@ -1,98 +1,131 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
 import { POLE, replay, summaries, type Selection } from './model'
-import { PlanIt } from './views/PlanIt'
-import { Home } from './views/home'
+import { ItemReplay } from './views/ItemReplay'
+import { Overview } from './views/Overview'
+import { PlanSettingsView } from './views/PlanSettings'
 import { SeeIt } from './views/SeeIt'
 import { Sets } from './views/Sets'
+import { Sheet } from './views/Sheet'
 
-// One page tells the whole story. The other three are its working, numbered as Lumino's brief
-// numbers its three jobs: see it, plan it, match the sets.
-const WORKING = [
-  { id: 'see', label: '1  Stock register' },
-  { id: 'plan', label: '2  Replay in detail' },
-  { id: 'sets', label: '3  Set check' },
+// The screens, grouped the way the work is done: the plan and its result first, then the
+// records it is built on, then the settings behind it.
+const NAV = [
+  {
+    group: 'Plan',
+    items: [
+      { id: 'overview', label: 'Overview', icon: 'M3 3h6v6H3zM11 3h6v6h-6zM3 11h6v6H3zM11 11h6v6h-6z' },
+      { id: 'sheet', label: 'Monthly sheet', icon: 'M4 5h12M4 10h12M4 15h8' },
+      { id: 'item', label: 'Item replay', icon: 'M6 4v12l10-6z' },
+    ],
+  },
+  {
+    group: 'Records',
+    items: [
+      { id: 'register', label: 'Stock register', icon: 'M5 3h9a2 2 0 0 1 2 2v12H6.5A1.5 1.5 0 0 1 5 15.5zM5 15.5A1.5 1.5 0 0 1 6.5 14H16' },
+      { id: 'sets', label: 'Set check', icon: 'M8 12l4-4M7.5 9.5l-2 2a2.8 2.8 0 0 0 4 4l2-2M12.5 10.5l2-2a2.8 2.8 0 0 0-4-4l-2 2' },
+    ],
+  },
+  {
+    group: 'Setup',
+    items: [{ id: 'settings', label: 'Plan settings', icon: 'M4 6h12M4 14h12M8 4v4M12 12v4' }],
+  },
 ] as const
-type TabId = 'home' | (typeof WORKING)[number]['id']
 
-const fromHash = (): TabId => {
-  const h = window.location.hash.replace('#', '')
-  return h === 'see' || h === 'plan' || h === 'sets' ? h : 'home'
+type ScreenId = (typeof NAV)[number]['items'][number]['id']
+const SCREENS = NAV.flatMap((g) => g.items.map((i) => i.id)) as ScreenId[]
+
+const fromHash = (): ScreenId => {
+  const h = window.location.hash.replace('#', '') as ScreenId
+  return SCREENS.includes(h) ? h : 'overview'
 }
 
 export default function App() {
-  const [tab, setTabState] = useState<TabId>(fromHash)
+  const [screen, setScreenState] = useState<ScreenId>(fromHash)
   useEffect(() => {
-    const follow = () => setTabState(fromHash())
+    const follow = () => setScreenState(fromHash())
     window.addEventListener('hashchange', follow)
     return () => window.removeEventListener('hashchange', follow)
   }, [])
-  const setTab = (next: TabId) => {
-    setTabState(next)
-    window.history.replaceState(null, '', next === 'home' ? window.location.pathname : `#${next}`)
+  const go = (next: ScreenId) => {
+    setScreenState(next)
+    window.history.replaceState(null, '', next === 'overview' ? window.location.pathname : `#${next}`)
     window.scrollTo({ top: 0 })
   }
+
   const [sel, setSel] = useState<Selection>({ item: POLE, godown: -1, month: summaries[POLE].peakIdleMonth })
-  const [settings, setSettings] = useState<PlanSettings>(DEFAULT_SETTINGS)
+  const [settings, setSettingsState] = useState<PlanSettings>(DEFAULT_SETTINGS)
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
+  const setSettings = (patch: Partial<PlanSettings>) => setSettingsState((s) => ({ ...s, ...patch }))
   const run = useMemo(() => replay(settings), [settings])
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-b border-rule py-4">
-        <h1 className="wide text-[20px] font-extrabold leading-none tracking-[-0.01em]">Slow the Trucks</h1>
-        <nav aria-label="Views" className="flex flex-wrap items-center gap-x-1 gap-y-1.5">
-          <button
-            type="button"
-            aria-current={tab === 'home' ? 'page' : undefined}
-            onClick={() => setTab('home')}
-            className={`rounded-md px-3 py-1.5 text-[14px] ${tab === 'home' ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-panel'}`}
-          >
-            The plan
-          </button>
-          <span className="ml-3 mr-1 text-[12.5px] text-muted">The working</span>
-          {WORKING.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              aria-current={t.id === tab ? 'page' : undefined}
-              onClick={() => setTab(t.id)}
-              className={`rounded-md px-2.5 py-1.5 text-[13.5px] whitespace-pre ${
-                t.id === tab ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-panel'
-              }`}
-            >
-              {t.label}
-            </button>
+    <div className="lg:grid lg:min-h-dvh lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <aside className="border-b border-rule bg-panel lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:border-b-0 lg:border-r">
+        <div className="flex items-center gap-2.5 px-4 pb-2 pt-3.5 lg:px-5 lg:pb-5 lg:pt-6">
+          <span aria-hidden className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink text-real">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2.5 7H13v9.5H2.5zM13 10h4.2l3.3 3.3v3.2H13" />
+            </svg>
+          </span>
+          <div>
+            <h1 className="wide text-[16px] font-extrabold leading-none tracking-[-0.01em]">Slow the Trucks</h1>
+            <p className="mt-1 text-[12px] leading-none text-muted">Lumino, Kanpur project</p>
+          </div>
+        </div>
+
+        <nav aria-label="Screens" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:block lg:overflow-visible lg:pb-0">
+          {NAV.map((group) => (
+            <div key={group.group} className="flex shrink-0 gap-1 lg:mb-4 lg:block">
+              <div className="hidden px-2 pb-1.5 text-[12px] text-muted lg:block">{group.group}</div>
+              {group.items.map((item) => {
+                const active = item.id === screen
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-current={active ? 'page' : undefined}
+                    onClick={() => go(item.id)}
+                    className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[14px] whitespace-nowrap lg:w-full ${
+                      active ? 'bg-ink font-semibold text-panel' : 'text-ink-2 hover:bg-cement'
+                    }`}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                      <path d={item.icon} />
+                    </svg>
+                    {item.label}
+                  </button>
+                )
+              })}
+            </div>
           ))}
         </nav>
-      </header>
 
-      <main className="pt-6">
-        {tab === 'home' && (
-          <Home
-            sel={sel}
-            set={set}
-            run={run}
-            setSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))}
-            open={setTab}
-          />
-        )}
-        {tab === 'see' && <SeeIt sel={sel} set={set} />}
-        {tab === 'plan' && (
-          <PlanIt
-            sel={sel}
-            set={set}
-            run={run}
-            setSettings={(patch) => setSettings((s) => ({ ...s, ...patch }))}
-          />
-        )}
-        {tab === 'sets' && <Sets sel={sel} set={set} />}
+        <p className="mt-auto hidden px-5 pb-5 text-[12px] leading-relaxed text-muted lg:block">
+          16 items, 6 godowns, March 2023 to October 2026. Built at Vibe Coders Hackathon Edition 3 on Lumino's own records. Quantities are exactly as recorded.
+        </p>
+      </aside>
+
+      <main className="min-w-0 px-4 pb-16 pt-6 sm:px-8 lg:pt-8">
+        <div className="mx-auto max-w-[1120px]">
+          {screen === 'overview' && (
+            <Overview
+              sel={sel}
+              run={run}
+              setSettings={setSettings}
+              openItem={(item) => {
+                set({ item })
+                go('item')
+              }}
+            />
+          )}
+          {screen === 'sheet' && <Sheet sel={sel} set={set} run={run} openSets={() => go('sets')} />}
+          {screen === 'item' && <ItemReplay sel={sel} set={set} run={run} />}
+          {screen === 'register' && <SeeIt sel={sel} set={set} />}
+          {screen === 'sets' && <Sets sel={sel} set={set} />}
+          {screen === 'settings' && <PlanSettingsView run={run} setSettings={setSettings} />}
+        </div>
       </main>
-
-      <footer className="mt-10 max-w-[80ch] text-[12.5px] text-muted">
-        Built at Vibe Coders Hackathon Edition 3 on data from Lumino Industries Limited. Quantities are exactly as
-        recorded. Where something is an estimate or an assumption, the page says so next to it.
-      </footer>
     </div>
   )
 }

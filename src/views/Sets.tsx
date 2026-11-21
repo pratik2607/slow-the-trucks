@@ -7,6 +7,7 @@ import { MonthPicker, Panel, Segmented } from '../components/ui'
 import { checkSets, ratioKey, remedyOf, SHORT_BELOW, SURPLUS_ABOVE, type Lens, type RatioBasis, type Remedy } from '../engine/sets'
 import { godownShort, monthLabel, qty, shortName, unitWord } from '../lib/format'
 import { godowns, months, project, type Selection, type SetSelection } from '../model'
+import { PageHeader } from './parts/shared'
 
 const itemOf = (code: string) => project.items.find((i) => i.code === code)!
 const nameOf = (code: string) => shortName(itemOf(code))
@@ -160,15 +161,13 @@ export function Sets({ sel, set }: { sel: Selection; set: SetSelection }) {
 
   return (
     <div className="grid gap-4">
-      <h2 className="wide text-[24px] font-bold leading-tight">Set check</h2>
-      <p className="-mt-2 max-w-[80ch] text-[15px]">
-        A pole clamp is no use without its eye hook and its bolts. If one part runs short, the whole set waits, however
-        much of the rest is lying in the store. For each of Lumino's three sets this checks every godown and every month:
-        of the parents sent there, how many could actually be fitted out with the parts sent alongside?
-      </p>
+      <PageHeader title="Set check" job="Job 3: Match the sets">
+        A pole clamp is no use without its eye hook and its bolts. If one part runs short, the whole set waits. For each of Lumino's three sets, in every godown and
+        month, this shows how many of the parents sent there could be fitted out with the parts sent alongside.
+      </PageHeader>
 
       <Panel
-        title="First, which ratio?"
+        title="Ratios"
         note="Lumino's sheet gives a ratio for each part. For most parts it does not match what the site used, and Lumino's own note says to ask its team before relying on it. Until someone does, the check uses what the site actually used. Type a number to use your own."
         aside={
           <Segmented

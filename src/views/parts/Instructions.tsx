@@ -1,4 +1,4 @@
-// Section 3: what the planner tells the stores this month. The filters stay on screen with their
+// What the planner tells the stores this month. The filters stay on screen with their
 // counts, and every line carries the same anatomy: what to do, to what, how much, and why.
 
 import { useMemo, useState } from 'react'
@@ -8,7 +8,7 @@ import type { ItemPlan } from '../../engine/planner'
 import { remedyOf } from '../../engine/sets'
 import { cover, monthLabel, qty, shortName, unitWord } from '../../lib/format'
 import { godowns, months, project, setsCheck, type Replay, type Selection } from '../../model'
-import { Card, itemName, place, reason, Section } from './shared'
+import { Card, itemName, place, reason } from './shared'
 
 type Verb = 'order' | 'hold' | 'move' | 'sets'
 
@@ -99,12 +99,7 @@ export function Instructions({ sel, run, openSets }: { sel: Selection; run: Repl
   const cut = <T,>(rows: T[]) => (all ? rows : rows.slice(0, SHOWN))
 
   return (
-    <Section
-      id="instructions"
-      n={3}
-      question="What does the planner tell the stores?"
-      lead={`One sheet a month, for all 16 items. This is the sheet for ${monthLabel(months[m])}; move the month above and it changes.`}
-    >
+    <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {(
           [
@@ -217,6 +212,6 @@ export function Instructions({ sel, run, openSets }: { sel: Selection; run: Repl
           </button>
         )}
       </Card>
-    </Section>
+    </div>
   )
 }

@@ -7,6 +7,7 @@ import { Figure, MonthPicker, Panel, Segmented } from '../components/ui'
 import { addSeries, sum } from '../engine/ledger'
 import { cover, godownShort, monthLabel, percent, qty, shortName, unitWord } from '../lib/format'
 import { godowns, ledgers, months, project, summaries, type Selection, type SetSelection } from '../model'
+import { PageHeader } from './parts/shared'
 
 const REAL = 'var(--color-real)'
 const HELD = 'var(--color-held)'
@@ -200,13 +201,9 @@ export function SeeIt({ sel, set }: { sel: Selection; set: SetSelection }) {
 
   return (
     <div className="grid gap-4">
-      <div>
-        <h2 className="wide text-[24px] font-bold leading-tight">Stock register</h2>
-        <p className="mt-1 max-w-[76ch] text-[14.5px] text-ink-2">
-          What came in, what went to contractors, what was used and what sat idle: every item, every godown, every month.
-          Pick an item in the table, then a godown.
-        </p>
-      </div>
+      <PageHeader title="Stock register" job="Job 1: See it">
+        What came in, what went to contractors, what was used and what sat idle: every item, every godown, every month. Pick an item in the table, then a godown.
+      </PageHeader>
       <Panel
         flush
         title="All 16 items, worst first"
