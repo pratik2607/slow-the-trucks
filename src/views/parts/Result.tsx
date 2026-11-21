@@ -25,7 +25,7 @@ export function Result({ run }: { run: Replay }) {
         <Key />
         <span className="text-[12.5px] text-muted">For a typical item of the {total}. Counted in quantities; Lumino's records carry no prices.</span>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="tiles" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-5">
           <div className="text-[13px] text-ink-2">Stock lying idle</div>
           <div className="wide figures mt-1 text-[34px] font-extrabold leading-none tracking-[-0.02em]">

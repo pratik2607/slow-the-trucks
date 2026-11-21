@@ -31,13 +31,15 @@ Everything is counted in quantities. Lumino's records carry no prices, so the ap
 | 2. Plan it: replay the project, seeing only what was known at each date | Overview, Monthly sheet, Item replay |
 | 3. Match the sets: flag every month a set is out of balance, in any godown | Set check |
 
+The Overview opens with a seven-step tour of its figures the first time it is visited; "Take the 30-second tour" at the top replays it.
+
 ## Ask AI
 
-A chat over the data, answered by a language model (Gemini on Vertex AI). The page writes out the records and the replay as plain text and sends them with the question; the model answers from that text alone.
+A chat over the data, answered by a language model: OpenAI's low-cost GPT-6 Luna first, Gemini on Vertex AI if that fails, and the app's own calculation if neither can be reached. The page writes out the records and the replay as plain text and sends them with the question; the model answers from that text alone, in a fixed shape: one direct sentence, then a few bullets or a small table.
 
-It has a data cut-off month. Only the records up to that month are sent, so the model cannot see past it; a test checks that the text holds no later month. The app's own calculation runs first: it declines a question about a later month before any model is asked, hands the model checked figures to build on, and is the answer shown if the model cannot be reached.
+It has a data cut-off month. Only the records up to that month are sent, so the model cannot see past it; a test checks that the text holds no later month. The app's own calculation runs first: it declines a question about a later month before any model is asked, hands the model checked figures and a worked-out ranking to build on, and is the answer shown if no model can be reached.
 
-A static site cannot keep a key, so the question goes through a small relay (`relay/server.js`) on Cloud Run. The relay holds no key either: it signs its calls with the cloud project's own identity. It turns away other websites, fixes the model's instructions on the server, and caps how much and how often it can be asked, for each address and in total. The origin check is a courtesy a script could fake; the caps are what bound its use.
+A static site cannot keep a key, so the question goes through a small relay (`relay/server.js`) on Cloud Run. The OpenAI key lives only in that service's settings; Gemini is called with the cloud project's own identity. The relay turns away other websites, fixes the model's instructions on the server, and caps how much and how often it can be asked, for each address and in total. The origin check is a courtesy a script could fake; the caps are what bound its use.
 
 ## How the planner decides
 
@@ -68,7 +70,7 @@ Three items show no gain: they were bought almost entirely before the first unit
 
 ## How it is built
 
-- React, TypeScript and Vite. A static site with nothing to sign in to. The one server-side piece is the Ask AI relay in `relay/`; there are no keys anywhere, in the page, the relay or this repository.
+- React, TypeScript and Vite. A static site with nothing to sign in to. The one server-side piece is the Ask AI relay in `relay/`; no key is in the page or in this repository.
 - Every push to `main` runs the tests, builds the site and publishes it to GitHub Pages.
 - `scripts/build-data.mjs` turns Lumino's raw CSVs into one monthly table (`src/data/project.json`). The raw files belong to Lumino and are not in this repository.
 - `src/engine/` holds the logic as plain functions: `ledger.ts` (job 1), `planner.ts` (job 2), `sets.ts` (job 3).
