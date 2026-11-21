@@ -37,7 +37,7 @@ A chat over the data, answered by a language model (Gemini on Vertex AI). The pa
 
 It has a data cut-off month. Only the records up to that month are sent, so the model cannot see past it; a test checks that the text holds no later month. The app's own calculation runs first: it declines a question about a later month before any model is asked, hands the model checked figures to build on, and is the answer shown if the model cannot be reached.
 
-A static site cannot keep a key, so the question goes through a small relay (`relay/server.js`) on Cloud Run. The relay holds no key either: it signs its calls with the cloud project's own identity. It answers only this site, fixes the model's instructions on the server, and limits how much and how often it can be asked.
+A static site cannot keep a key, so the question goes through a small relay (`relay/server.js`) on Cloud Run. The relay holds no key either: it signs its calls with the cloud project's own identity. It turns away other websites, fixes the model's instructions on the server, and caps how much and how often it can be asked, for each address and in total. The origin check is a courtesy a script could fake; the caps are what bound its use.
 
 ## How the planner decides
 

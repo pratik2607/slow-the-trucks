@@ -7,7 +7,8 @@ import http from 'node:http'
 const PROJECT = process.env.GOOGLE_CLOUD_PROJECT || 'partynow-media'
 const MODELS = (process.env.MODELS || 'gemini-3.8-flash,gemini-3.5-flash').split(',')
 const ORIGINS = new Set((process.env.ORIGINS || 'https://pratik2607.github.io,http://localhost:5173,http://127.0.0.1:5173').split(','))
-const MAX = { body: 260_000, question: 400, data: 220_000, turns: 3, turnText: 700 }
+// The page sends about 45,000 characters of records with a question; the limits sit just above that.
+const MAX = { body: 90_000, question: 400, data: 70_000, turns: 3, turnText: 700 }
 
 // The rules are fixed here, on the server, so the page cannot be used to ask the model anything else.
 const SYSTEM = [
@@ -33,7 +34,8 @@ async function accessToken() {
   return token.value
 }
 
-// A small brake: at most 15 questions a minute from one address.
+// Two brakes. Neither the origin check nor these make the relay private: they bound what it can be
+// made to do. First, at most 15 requests a minute from one address.
 const recent = new Map()
 function tooMany(ip) {
   const now = Date.now()
@@ -42,6 +44,17 @@ function tooMany(ip) {
   if (recent.size > 5000) recent.clear()
   recent.set(ip, list)
   return list.length > 15
+}
+
+// Second, a ceiling on questions passed to the model whoever is asking: 30 a minute and 400 a day
+// for each running copy of this service (Cloud Run is told to run at most two).
+let asked = []
+function overBudget() {
+  const now = Date.now()
+  asked = asked.filter((t) => now - t < 86_400_000)
+  if (asked.length >= 400 || asked.filter((t) => now - t < 60_000).length >= 30) return true
+  asked.push(now)
+  return false
 }
 
 const fail = (status, message) => Object.assign(new Error(message), { status, shown: message })
@@ -99,7 +112,10 @@ http
       if (req.method === 'GET' && req.url === '/') return reply(200, { ok: true, service: 'Slow the Trucks: Ask AI relay' })
       if (req.method !== 'POST' || req.url !== '/ask') return reply(404, { error: 'Not found.' })
       if (!known) return reply(403, { error: 'This relay only answers the Slow the Trucks site.' })
-      const ip = String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? '').split(',')[0].trim()
+      // Cloud Run's front end appends the caller's real address to X-Forwarded-For, so the last entry
+      // is the one to count; anything before it was supplied by the caller and could be made up.
+      const forwarded = String(req.headers['x-forwarded-for'] ?? '').split(',').map((s) => s.trim()).filter(Boolean)
+      const ip = forwarded.at(-1) ?? req.socket.remoteAddress ?? ''
       if (tooMany(ip)) return reply(429, { error: 'Too many questions at once. Try again in a minute.' })
 
       const { question, data, asOf, history } = await read(req)
@@ -112,6 +128,7 @@ http
         contents.push({ role: 'user', parts: [{ text: t.q.slice(0, MAX.turnText) }] }, { role: 'model', parts: [{ text: t.a.slice(0, MAX.turnText) }] })
       }
       contents.push({ role: 'user', parts: [{ text: `DATA (records up to ${String(asOf ?? '').slice(0, 20)}):\n${data}\n\nQUESTION: ${question.trim()}` }] })
+      if (overBudget()) return reply(429, { error: 'Ask AI has answered a lot of questions. Try again later.' })
       reply(200, await askModel(contents))
     } catch (e) {
       if (!e.shown) console.error('ask failed:', e.message)
