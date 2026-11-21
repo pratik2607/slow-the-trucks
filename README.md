@@ -31,6 +31,12 @@ Everything is counted in quantities. Lumino's records carry no prices, so the ap
 | 2. Plan it: replay the project, seeing only what was known at each date | Overview, Monthly sheet, Item replay |
 | 3. Match the sets: flag every month a set is out of balance, in any godown | Set check |
 
+## Ask AI
+
+A chat over the data. It reads the item, month and godown out of a plain question and works the answer out from the records and the replay, in the browser. It does not call a language model, so there is no key and it cannot make a figure up: an answer is what the data says, or a plain "I can't answer that".
+
+It has a data cut-off month. It answers as if that month were today, declines anything later, and stops its totals and averages there. Moving the cut-off forward is the only way to let it see more.
+
 ## How the planner decides
 
 At the start of every month, using earlier months only:
@@ -64,7 +70,7 @@ Three items show no gain: they were bought almost entirely before the first unit
 - Every push to `main` runs the tests, builds the site and publishes it to GitHub Pages.
 - `scripts/build-data.mjs` turns Lumino's raw CSVs into one monthly table (`src/data/project.json`). The raw files belong to Lumino and are not in this repository.
 - `src/engine/` holds the logic as plain functions: `ledger.ts` (job 1), `planner.ts` (job 2), `sets.ts` (job 3).
-- 33 tests cover the stock sums, the replay and the set check.
+- 49 tests cover the stock sums, the replay, the set check and the chat.
 
 ```bash
 npm install

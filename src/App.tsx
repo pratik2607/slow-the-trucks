@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DEFAULT_SETTINGS, type PlanSettings } from './engine/planner'
-import { POLE, replay, summaries, type Selection } from './model'
+import { months, POLE, replay, summaries, type Selection } from './model'
+import { Ask, type ChatLine } from './views/Ask'
 import { ItemReplay } from './views/ItemReplay'
 import { Overview } from './views/Overview'
 import { PlanSettingsView } from './views/PlanSettings'
@@ -18,6 +19,10 @@ const NAV = [
       { id: 'sheet', label: 'Monthly sheet', icon: 'M4 5h12M4 10h12M4 15h8' },
       { id: 'item', label: 'Item replay', icon: 'M6 4v12l10-6z' },
     ],
+  },
+  {
+    group: 'Ask',
+    items: [{ id: 'ask', label: 'Ask AI', icon: 'M4 4.5h12v8.5H9.5L6 16v-3H4z' }],
   },
   {
     group: 'Records',
@@ -58,6 +63,10 @@ export default function App() {
   const set = (patch: Partial<Selection>) => setSel((current) => ({ ...current, ...patch }))
   const setSettings = (patch: Partial<PlanSettings>) => setSettingsState((s) => ({ ...s, ...patch }))
   const run = useMemo(() => replay(settings), [settings])
+  // The conversation lives here so it is still there after a visit to another screen.
+  const [chat, setChat] = useState<ChatLine[]>([])
+  // The last month the chat is allowed to know about. It starts by seeing the whole project.
+  const [cutoff, setCutoff] = useState(months.length - 1)
 
   return (
     <div className="lg:grid lg:min-h-dvh lg:grid-cols-[15rem_minmax(0,1fr)]">
@@ -121,6 +130,7 @@ export default function App() {
           )}
           {screen === 'sheet' && <Sheet sel={sel} set={set} run={run} openSets={() => go('sets')} />}
           {screen === 'item' && <ItemReplay sel={sel} set={set} run={run} />}
+          {screen === 'ask' && <Ask sel={sel} set={set} run={run} chat={chat} setChat={setChat} cutoff={cutoff} setCutoff={setCutoff} open={go} />}
           {screen === 'register' && <SeeIt sel={sel} set={set} />}
           {screen === 'sets' && <Sets sel={sel} set={set} />}
           {screen === 'settings' && <PlanSettingsView run={run} setSettings={setSettings} />}
